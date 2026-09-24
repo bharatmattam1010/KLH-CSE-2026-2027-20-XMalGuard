@@ -1,0 +1,90 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>XMalGuard System Scan Report</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+            h1, h2 { color: #1a1a2e; }
+            .summary { display: flex; gap: 20px; margin-bottom: 20px; }
+            .card { padding: 15px; background: white; border-radius: 8px; border: 1px solid #ddd; flex: 1; text-align: center; }
+            .card.malicious { color: #dc3545; border-color: #dc3545; background: #fff0f0; }
+            .card.benign { color: #28a745; border-color: #28a745; background: #f0fff0; }
+            table { width: 100%; border-collapse: collapse; background: white; font-size: 0.9em; }
+            th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+            th { background: #1a1a2e; color: white; }
+            .row-malicious { background: #fff0f0; }
+            .row-benign { background: #f0fff0; }
+            .badge { padding: 4px 8px; border-radius: 4px; color: white; font-size: 0.8em; font-weight: bold; }
+            .bg-red { background: #dc3545; }
+            .bg-green { background: #28a745; }
+            .expl { font-size: 0.85em; color: #555; }
+            .pos-expl { color: #dc3545; font-weight: bold; }
+            .neg-expl { color: #28a745; font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <h1>XMalGuard System Directory Scan</h1>
+        <p><strong>Target Directory:</strong> test_samples</p>
+        <p><strong>Scan Completed:</strong> 2026-09-17 12:01:08</p>
+        
+        <div class="summary">
+            <div class="card">
+                <h2>2</h2>
+                <p>Total Executables Scanned</p>
+            </div>
+            <div class="card malicious">
+                <h2>1</h2>
+                <p>Malicious Threats Detected</p>
+            </div>
+            <div class="card benign">
+                <h2>1</h2>
+                <p>Safe / Benign Files</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Prediction</th>
+                    <th>Risk</th>
+                    <th>Top Malicious Indicator (SHAP)</th>
+                    <th>Top Benign Indicator (SHAP)</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                <tr class="row-benign">
+                    <td>
+                        <strong>benign_calculator.exe</strong><br/>
+                        <span style="font-size:0.75em; color:#777;">test_samples\benign_calculator.exe</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-green">BENIGN</span><br/>
+                        <span style="font-size:0.8em;">Conf: 96.0%</span>
+                    </td>
+                    <td>LOW</td>
+                    <td class="pos-expl">characteristics (+0.02)</td>
+                    <td class="neg-expl">suspicious_import_count (-0.24)</td>
+                </tr>
+        
+                <tr class="row-malicious">
+                    <td>
+                        <strong>simulated_malware.exe</strong><br/>
+                        <span style="font-size:0.75em; color:#777;">test_samples\simulated_malware.exe</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-red">MALICIOUS</span><br/>
+                        <span style="font-size:0.8em;">Conf: 54.0%</span>
+                    </td>
+                    <td>CRITICAL</td>
+                    <td class="pos-expl">suspicious_string_count (+0.21)</td>
+                    <td class="neg-expl">suspicious_import_count (-0.25)</td>
+                </tr>
+        
+            </tbody>
+        </table>
+    </body>
+    </html>
+    

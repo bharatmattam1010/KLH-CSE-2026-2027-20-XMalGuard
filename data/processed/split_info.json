@@ -1,0 +1,17 @@
+{
+    "train": {
+        "size": 3500,
+        "label_0": 2100,
+        "label_1": 1400
+    },
+    "val": {
+        "size": 750,
+        "label_0": 450,
+        "label_1": 300
+    },
+    "test": {
+        "size": 750,
+        "label_0": 450,
+        "label_1": 300
+    }
+}
