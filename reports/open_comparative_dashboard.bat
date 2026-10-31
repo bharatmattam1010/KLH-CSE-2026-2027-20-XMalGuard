@@ -1,0 +1,3 @@
+@echo off
+echo Opening XMalGuard Comparative Results Dashboard in default browser...
+start "" "%~dp0XMalGuard_Comparative_Results_Dashboard.html"

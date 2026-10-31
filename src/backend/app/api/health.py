@@ -28,9 +28,16 @@ def health_check(db: Session = Depends(get_db)):
     # Assuming models/ directory is at the project root or relative to app
     # For now, we will just check a common path or return 'unknown'
     model_loaded = False
-    model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "models", "rf_model.joblib")
-    if os.path.exists(model_path):
-        model_loaded = True
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.join(os.path.dirname(curr_dir), "models", "final_model.joblib"),
+        os.path.abspath(os.path.join(curr_dir, "../../../models/final_model.joblib")),
+        os.path.abspath(os.path.join(curr_dir, "../../models/final_model.joblib")),
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            model_loaded = True
+            break
         
     return {
         "status": "healthy" if db_status == "connected" else "degraded",
@@ -45,7 +52,13 @@ def model_info():
     """
     Retrieve model information from metadata.
     """
-    metadata_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "models", "training_metadata.json")
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.abspath(os.path.join(curr_dir, "../../../models/training_metadata.json")),
+        os.path.join(os.path.dirname(curr_dir), "models", "training_metadata.json"),
+        os.path.abspath(os.path.join(curr_dir, "../../models/training_metadata.json")),
+    ]
+    metadata_path = next((p for p in candidates if os.path.exists(p)), candidates[0])
     
     if os.path.exists(metadata_path):
         try:

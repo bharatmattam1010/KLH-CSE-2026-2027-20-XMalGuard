@@ -29,14 +29,31 @@ def get_history(
         
     result = []
     for record in records:
+        pred_str = (record.prediction or "unknown").lower()
+        is_mal = (pred_str == "malicious")
+        conf = float(record.confidence or 0.0)
+        
         result.append({
             "id": record.id,
             "filename": record.filename,
             "sha256": record.sha256,
+            "created_at": record.timestamp.isoformat() if record.timestamp else None,
             "timestamp": record.timestamp.isoformat() if record.timestamp else None,
-            "prediction": record.prediction,
-            "confidence": record.confidence,
-            "risk_score": record.risk_score,
+            "file_info": {
+                "filename": record.filename,
+                "hashes": {"sha256": record.sha256}
+            },
+            "prediction": {
+                "prediction": "malicious" if is_mal else "benign",
+                "is_malicious": is_mal,
+                "confidence": conf
+            },
+            "confidence": conf,
+            "risk_assessment": {
+                "score": float(record.risk_score or 0.0),
+                "level": record.risk_level or ("CRITICAL" if is_mal else "LOW")
+            },
+            "risk_score": float(record.risk_score or 0.0),
             "risk_level": record.risk_level
         })
     return result
@@ -55,20 +72,44 @@ def get_analysis(analysis_id: str, db: Session = Depends(get_db)):
     shap_data = json.loads(record.shap_json) if record.shap_json else None
     threat_intel = json.loads(record.threat_intel_json) if record.threat_intel_json else None
     
+    pred_str = (record.prediction or "unknown").lower()
+    is_mal = (pred_str == "malicious")
+    conf = float(record.confidence or 0.0)
+    mal_prob = conf if is_mal else (1.0 - conf)
+    ben_prob = (1.0 - conf) if is_mal else conf
+    
     return {
         "analysis_id": record.id,
+        "id": record.id,
         "filename": record.filename,
         "timestamp": record.timestamp.isoformat() if record.timestamp else None,
-        "file_info": features.get("file_info", {"sha256": record.sha256, "size": record.file_size}),
+        "created_at": record.timestamp.isoformat() if record.timestamp else None,
+        "file_info": features.get("file_info", {
+            "filename": record.filename,
+            "hashes": {"sha256": record.sha256},
+            "sha256": record.sha256,
+            "file_size": record.file_size
+        }),
         "prediction": {
-            "prediction": record.prediction,
-            "confidence": record.confidence
+            "prediction": "malicious" if is_mal else "benign",
+            "is_malicious": is_mal,
+            "confidence": conf,
+            "malicious_probability": mal_prob,
+            "benign_probability": ben_prob,
+            "probabilities": {
+                "malicious": mal_prob,
+                "benign": ben_prob
+            }
         },
         "risk_assessment": {
-            "score": record.risk_score,
-            "level": record.risk_level
+            "score": float(record.risk_score or 0.0),
+            "total_score": float(record.risk_score or 0.0),
+            "level": record.risk_level or ("CRITICAL" if is_mal else "LOW"),
+            "risk_level": record.risk_level or ("CRITICAL" if is_mal else "LOW"),
+            "breakdown": {},
+            "contributing_factors": []
         },
-        "static_features": features.get("ml_features", {}),
+        "static_features": features.get("ml_features", features),
         "explanation": shap_data,
         "threat_intelligence": threat_intel
     }

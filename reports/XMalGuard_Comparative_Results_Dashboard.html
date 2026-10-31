@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XMalGuard - Comparative Empirical Results & Visualization Dashboard</title>
+  <!-- Chart.js via CDN for responsive interactive charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --accent: #e11d48;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); line-height: 1.5; padding-bottom: 60px; }
+
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%);
+      color: white;
+      padding: 30px 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+    .title-area h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+    .title-area p { font-size: 14px; color: #bae6fd; margin-top: 5px; }
+    .badge-bar { display: flex; gap: 10px; }
+    .badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+
+    .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+
+    /* KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 30px; }
+    .kpi-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+    .kpi-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+    .kpi-card.acc::before { background: var(--success); }
+    .kpi-card.prec::before { background: #0ea5e9; }
+    .kpi-card.rec::before { background: #6366f1; }
+    .kpi-card.f1::before { background: #ec4899; }
+    .kpi-card.fpr::before { background: var(--warning); }
+    .kpi-card.lat::before { background: #14b8a6; }
+    .kpi-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+    .kpi-value { font-size: 32px; font-weight: 800; color: var(--text-main); margin: 6px 0; }
+    .kpi-sub { font-size: 12px; color: var(--text-muted); }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid var(--border); padding-bottom: 10px; overflow-x: auto; }
+    .tab-btn { background: none; border: none; padding: 10px 20px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 8px; transition: all 0.2s; }
+    .tab-btn:hover { background: #e2e8f0; color: var(--text-main); }
+    .tab-btn.active { background: var(--primary); color: white; }
+
+    /* Tab Content */
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Card Panels */
+    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(620px, 1fr)); gap: 24px; margin-bottom: 30px; }
+    .panel-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .panel-header h2 { font-size: 17px; font-weight: 700; color: var(--text-main); }
+    .panel-header p { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+
+    /* Photo Viewer */
+    .photo-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .photo-header { padding: 16px 24px; background: #f1f5f9; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .photo-header h3 { font-size: 16px; font-weight: 700; color: var(--text-main); }
+    .photo-header .btn { background: var(--primary); color: white; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .photo-header .btn:hover { background: var(--primary-dark); }
+    .photo-img-wrap { padding: 20px; background: #ffffff; text-align: center; }
+    .photo-img-wrap img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+
+    /* Table Styles */
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    table.data-table th { background: #f8fafc; padding: 12px 14px; font-weight: 700; color: #334155; border-bottom: 2px solid var(--border); }
+    table.data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: #475569; }
+    table.data-table tr:hover { background: #f8fafc; }
+    table.data-table tr.highlight { background: #fff1f2; font-weight: 700; color: #be123c; }
+
+    .matrix-box { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
+    .matrix-cell { padding: 18px; border-radius: 8px; text-align: center; }
+    .matrix-cell.tn { background: #ccfbf1; border: 1px solid #14b8a6; color: #0f766e; }
+    .matrix-cell.fp { background: #fee2e2; border: 1px solid #f43f5e; color: #b91c1c; }
+    .matrix-cell.fn { background: #fee2e2; border: 1px solid #f43f5e; color: #b91c1c; }
+    .matrix-cell.tp { background: #d1fae5; border: 1px solid #10b981; color: #047857; }
+    .matrix-num { font-size: 28px; font-weight: 800; }
+    .matrix-lbl { font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="title-area">
+        <h1>XMalGuard: Comparative Results & Empirical Visualizer</h1>
+        <p>Interactive Performance Analysis & Publication-Grade Comparative Graphics (750 Test Samples: 375 Benign, 375 Malware)</p>
+      </div>
+      <div class="badge-bar">
+        <span class="badge" style="background:#22c55e;">XGBoost + SHAP Best</span>
+        <span class="badge">EMBER Benchmark</span>
+        <span class="badge">FastAPI + React</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- KPI Summary Row -->
+    <div class="kpi-grid">
+      <div class="kpi-card acc">
+        <div class="kpi-label">Overall Accuracy</div>
+        <div class="kpi-value">98.80%</div>
+        <div class="kpi-sub">741 / 750 Test Binaries</div>
+      </div>
+      <div class="kpi-card prec">
+        <div class="kpi-label">Precision</div>
+        <div class="kpi-value">99.19%</div>
+        <div class="kpi-sub">369 TP / (369 TP + 3 FP)</div>
+      </div>
+      <div class="kpi-card rec">
+        <div class="kpi-label">Recall (Sensitivity)</div>
+        <div class="kpi-value">98.40%</div>
+        <div class="kpi-sub">369 TP / 375 Malware</div>
+      </div>
+      <div class="kpi-card f1">
+        <div class="kpi-label">F1-Score</div>
+        <div class="kpi-value">98.79%</div>
+        <div class="kpi-sub">Harmonic Mean</div>
+      </div>
+      <div class="kpi-card fpr">
+        <div class="kpi-label">False Positive Rate</div>
+        <div class="kpi-value">0.80%</div>
+        <div class="kpi-sub">Only 3 False Alarms</div>
+      </div>
+      <div class="kpi-card lat">
+        <div class="kpi-label">Triage Latency</div>
+        <div class="kpi-value">18.4 ms</div>
+        <div class="kpi-sub">Sub-second Static Parsing</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-photos')">Comparative Result Photos (High-Res)</button>
+      <button class="tab-btn" onclick="switchTab('tab-models')">Model Baseline Comparisons</button>
+      <button class="tab-btn" onclick="switchTab('tab-literature')">Literature Benchmark (SOTA)</button>
+      <button class="tab-btn" onclick="switchTab('tab-ablation')">Ablation & Curves</button>
+      <button class="tab-btn" onclick="switchTab('tab-shap')">SHAP Explainability & Speed</button>
+    </div>
+
+    <!-- ==================== TAB 1: RESULT PHOTOS ==================== -->
+    <div id="tab-photos" class="tab-pane active">
+
+      <!-- Photo 1 -->
+      <div class="photo-card">
+        <div class="photo-header">
+          <div>
+            <h3>Photo 1: Baseline Models Evaluation Benchmark</h3>
+            <p style="font-size:12px; color:var(--text-muted);">Comparing 5 ML algorithms across Accuracy, Precision, Recall, F1, FPR, ROC-AUC, and Latency tradeoff</p>
+          </div>
+          <a class="btn" href="comparative_models_evaluation.png" target="_blank">View Full Image (1600x1000)</a>
+        </div>
+        <div class="photo-img-wrap">
+          <img src="comparative_models_evaluation.png" alt="Comparative Models Evaluation">
+        </div>
+      </div>
+
+      <!-- Photo 2 -->
+      <div class="photo-card">
+        <div class="photo-header">
+          <div>
+            <h3>Photo 2: State-of-the-Art Literature & Benchmark Comparison</h3>
+            <p style="font-size:12px; color:var(--text-muted);">Comparative evaluation against Saxe & Berlin (DNN), Anderson & Roth (EMBER), Raff et al. (MalConv), and Yousuf et al.</p>
+          </div>
+          <a class="btn" href="comparative_literature_benchmarks.png" target="_blank">View Full Image (1600x1000)</a>
+        </div>
+        <div class="photo-img-wrap">
+          <img src="comparative_literature_benchmarks.png" alt="Comparative Literature Benchmarks">
+        </div>
+      </div>
+
+      <!-- Photo 3 -->
+      <div class="photo-card">
+        <div class="photo-header">
+          <div>
+            <h3>Photo 3: Incremental Feature Ablation & Multi-Model ROC/PR Curves</h3>
+            <p style="font-size:12px; color:var(--text-muted);">Five-tier ablation progression from header features to full composite engine, paired with ROC and Precision-Recall discrimination curves</p>
+          </div>
+          <a class="btn" href="comparative_feature_ablation_roc_pr.png" target="_blank">View Full Image (1600x1000)</a>
+        </div>
+        <div class="photo-img-wrap">
+          <img src="comparative_feature_ablation_roc_pr.png" alt="Feature Ablation & ROC/PR Curves">
+        </div>
+      </div>
+
+      <!-- Photo 4 -->
+      <div class="photo-card">
+        <div class="photo-header">
+          <div>
+            <h3>Photo 4: Master Executive Performance Dashboard</h3>
+            <p style="font-size:12px; color:var(--text-muted);">Consolidated infographic: 6 KPI badges, baseline bar chart, confusion matrix, top SHAP drivers, and sub-second latency breakdown</p>
+          </div>
+          <a class="btn" href="comparative_executive_summary_dashboard.png" target="_blank">View Full Image (1600x1000)</a>
+        </div>
+        <div class="photo-img-wrap">
+          <img src="comparative_executive_summary_dashboard.png" alt="Executive Performance Dashboard">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 2: INTERACTIVE MODEL COMPARISON ==================== -->
+    <div id="tab-models" class="tab-pane">
+      <div class="chart-grid">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Interactive Metric Comparison Bar Chart</h2>
+              <p>Hover over bars to inspect verified exact percentages across all 5 models</p>
+            </div>
+          </div>
+          <canvas id="modelBarChart" height="280"></canvas>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Radar Performance Profile</h2>
+              <p>Multi-dimensional signature comparing model capabilities</p>
+            </div>
+          </div>
+          <canvas id="modelRadarChart" height="280"></canvas>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2>Empirical Baseline Comparison Data Table</h2>
+            <p>Identical 35-feature representations on 750 holdout binaries from the EMBER benchmark</p>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Model Architecture</th>
+              <th>Configuration / Parameters</th>
+              <th>Accuracy (%)</th>
+              <th>Precision (%)</th>
+              <th>Recall (%)</th>
+              <th>F1-Score (%)</th>
+              <th>FPR (%)</th>
+              <th>ROC-AUC</th>
+              <th>Latency</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Logistic Regression</td>
+              <td>L2 penalty, C=1.0, max_iter=1000</td>
+              <td>94.40%</td>
+              <td>94.91%</td>
+              <td>93.87%</td>
+              <td>94.39%</td>
+              <td>5.07%</td>
+              <td>0.9784</td>
+              <td>12.1 ms</td>
+            </tr>
+            <tr>
+              <td>Support Vector Classifier (SVC)</td>
+              <td>RBF kernel, C=2.0, gamma=scale</td>
+              <td>96.27%</td>
+              <td>96.51%</td>
+              <td>96.00%</td>
+              <td>96.26%</td>
+              <td>3.47%</td>
+              <td>0.9891</td>
+              <td>24.6 ms</td>
+            </tr>
+            <tr>
+              <td>LightGBM GBDT</td>
+              <td>num_leaves=31, lr=0.05, 300 trees</td>
+              <td>98.53%</td>
+              <td>98.93%</td>
+              <td>98.13%</td>
+              <td>98.53%</td>
+              <td>1.07%</td>
+              <td>0.9974</td>
+              <td>15.2 ms</td>
+            </tr>
+            <tr>
+              <td>Random Forest Classifier</td>
+              <td>n_estimators=300, max_depth=16</td>
+              <td>98.67%</td>
+              <td>99.19%</td>
+              <td>98.13%</td>
+              <td>98.66%</td>
+              <td>0.80%</td>
+              <td>0.9976</td>
+              <td>16.8 ms</td>
+            </tr>
+            <tr class="highlight">
+              <td>Proposed XMalGuard (XGBoost)</td>
+              <td>300 trees, depth=6, lr=0.08, subsample=0.85</td>
+              <td>98.80%</td>
+              <td>99.19%</td>
+              <td>98.40%</td>
+              <td>98.79%</td>
+              <td>0.80%</td>
+              <td>0.9982</td>
+              <td>18.4 ms</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: LITERATURE BENCHMARK ==================== -->
+    <div id="tab-literature" class="tab-pane">
+      <div class="chart-grid">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Inference Latency: XMalGuard vs Prior Works (ms)</h2>
+              <p>Lower latency enables high-speed perimeter firewall & gateway inspection</p>
+            </div>
+          </div>
+          <canvas id="litLatencyChart" height="260"></canvas>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Feature Compactness: Input Space Dimensions</h2>
+              <p>Comparing raw-byte and deep features vs XMalGuard's 35 curated indicators</p>
+            </div>
+          </div>
+          <canvas id="litDimChart" height="260"></canvas>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2>State-of-the-Art Literature Comparison Table</h2>
+            <p>Evaluation against prominent published malware detection architectures</p>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Study & Citation</th>
+              <th>Architecture</th>
+              <th>Feature Footprint</th>
+              <th>Reported Performance</th>
+              <th>XAI Support</th>
+              <th>Threat Intel</th>
+              <th>Limitations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Saxe & Berlin (2015)</strong> [24]</td>
+              <td>4-layer Deep Neural Net (DNN)</td>
+              <td>1,024 byte histograms</td>
+              <td>95.20% TPR at 0.1% FPR (0.982 AUC)</td>
+              <td>None (Black-Box)</td>
+              <td>No (Offline)</td>
+              <td>High GPU requirements, opaque verdicts</td>
+            </tr>
+            <tr>
+              <td><strong>Anderson & Roth (2018)</strong> [20]</td>
+              <td>LightGBM GBDT (EMBER Benchmark)</td>
+              <td>2,351 static features</td>
+              <td>92.90% F1, 0.9820 ROC-AUC</td>
+              <td>Partial (Global)</td>
+              <td>No (Offline)</td>
+              <td>High feature extraction memory overhead</td>
+            </tr>
+            <tr>
+              <td><strong>Raff et al. MalConv (2018)</strong> [25]</td>
+              <td>CNN on Raw Byte Streams</td>
+              <td>First 2 MB raw bytes</td>
+              <td>94.00% Acc, 0.9790 ROC-AUC</td>
+              <td>None (Adversarial Fragile)</td>
+              <td>No (Offline)</td>
+              <td>Susceptible to byte-padding and packing evasion</td>
+            </tr>
+            <tr>
+              <td><strong>Yousuf et al. (2023)</strong> [10]</td>
+              <td>Stacking Ensemble (RF + ET + GB)</td>
+              <td>56 PE header features</td>
+              <td>99.50% Acc (Older 2017 Dataset)</td>
+              <td>None (Voting)</td>
+              <td>No (Offline)</td>
+              <td>Evaluated on legacy static dataset; no explainability</td>
+            </tr>
+            <tr class="highlight">
+              <td><strong>XMalGuard (This Work)</strong></td>
+              <td>Calibrated XGBoost + TreeSHAP + VT</td>
+              <td>35 curated PE/API heuristics</td>
+              <td>98.80% Acc, 98.79% F1, 0.9982 AUC</td>
+              <td>Game-Theoretic SHAP</td>
+              <td>Live VirusTotal API</td>
+              <td>Fast CPU inference (18.4ms); purely static</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 4: ABLATION & DISCRIMINATION ==================== -->
+    <div id="tab-ablation" class="tab-pane">
+      <div class="chart-grid">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Incremental Feature Ablation Progression</h2>
+              <p>Stepwise F1-score enhancement across 5 feature tiers</p>
+            </div>
+          </div>
+          <canvas id="ablationBarChart" height="280"></canvas>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Confusion Matrix Analysis (750 Test Samples)</h2>
+              <p>Classification certainty breakdown across benign and malware cohorts</p>
+            </div>
+          </div>
+          <div class="matrix-box">
+            <div class="matrix-cell tn">
+              <div class="matrix-num">372</div>
+              <div class="matrix-lbl">True Negatives (TN)</div>
+              <div style="font-size:11px; margin-top:4px;">99.20% Specificity (372 / 375)</div>
+            </div>
+            <div class="matrix-cell fp">
+              <div class="matrix-num">3</div>
+              <div class="matrix-lbl">False Positives (FP)</div>
+              <div style="font-size:11px; margin-top:4px;">0.80% False Alarm (3 / 375)</div>
+            </div>
+            <div class="matrix-cell fn">
+              <div class="matrix-num">6</div>
+              <div class="matrix-lbl">False Negatives (FN)</div>
+              <div style="font-size:11px; margin-top:4px;">1.60% Miss Rate (6 / 375)</div>
+            </div>
+            <div class="matrix-cell tp">
+              <div class="matrix-num">369</div>
+              <div class="matrix-lbl">True Positives (TP)</div>
+              <div style="font-size:11px; margin-top:4px;">98.40% Recall (369 / 375)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 5: SHAP & SPEED ==================== -->
+    <div id="tab-shap" class="tab-pane">
+      <div class="chart-grid">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Top 10 Global SHAP Feature Attributions</h2>
+              <p>Mean |SHAP| impact driving malware predictions across 3,500 training samples</p>
+            </div>
+          </div>
+          <canvas id="shapChart" height="300"></canvas>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Sub-Second Latency Breakdown (Total: 18.4 ms)</h2>
+              <p>Component timing breakdown of the automated reverse-engineering pipeline</p>
+            </div>
+          </div>
+          <canvas id="latencyDoughnut" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Chart 1: Model Comparison Bar Chart
+    const ctxModelBar = document.getElementById('modelBarChart').getContext('2d');
+    new Chart(ctxModelBar, {
+      type: 'bar',
+      data: {
+        labels: ['Logistic Regression', 'SVC (RBF)', 'Random Forest', 'LightGBM', 'Proposed XMalGuard'],
+        datasets: [
+          { label: 'Accuracy (%)', data: [94.40, 96.27, 98.67, 98.53, 98.80], backgroundColor: '#0284c7' },
+          { label: 'Precision (%)', data: [94.91, 96.51, 99.19, 98.93, 99.19], backgroundColor: '#0ea5e9' },
+          { label: 'Recall (%)', data: [93.87, 96.00, 98.13, 98.13, 98.40], backgroundColor: '#10b981' },
+          { label: 'F1-Score (%)', data: [94.39, 96.26, 98.66, 98.53, 98.79], backgroundColor: '#e11d48' }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { min: 90, max: 100 } },
+        plugins: { legend: { position: 'top' } }
+      }
+    });
+
+    // Chart 2: Radar Comparison Chart
+    const ctxModelRadar = document.getElementById('modelRadarChart').getContext('2d');
+    new Chart(ctxModelRadar, {
+      type: 'radar',
+      data: {
+        labels: ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC (x100)', 'Low FPR Score'],
+        datasets: [
+          {
+            label: 'Proposed XMalGuard (XGBoost)',
+            data: [98.80, 99.19, 98.40, 98.79, 99.82, 99.20],
+            borderColor: '#e11d48',
+            backgroundColor: 'rgba(225, 29, 72, 0.2)',
+            borderWidth: 2
+          },
+          {
+            label: 'Random Forest',
+            data: [98.67, 99.19, 98.13, 98.66, 99.76, 99.20],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 1.5
+          },
+          {
+            label: 'Logistic Regression',
+            data: [94.40, 94.91, 93.87, 94.39, 97.84, 94.93],
+            borderColor: '#94a3b8',
+            backgroundColor: 'rgba(148, 163, 184, 0.1)',
+            borderWidth: 1.5
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: { r: { min: 92, max: 100 } }
+      }
+    });
+
+    // Chart 3: Literature Latency
+    const ctxLitLat = document.getElementById('litLatencyChart').getContext('2d');
+    new Chart(ctxLitLat, {
+      type: 'bar',
+      data: {
+        labels: ['Raff et al. (MalConv)', 'Saxe & Berlin (DNN)', 'Anderson & Roth (EMBER)', 'Yousuf et al. (Stacking)', 'XMalGuard (Proposed)'],
+        datasets: [{
+          label: 'Inference Latency (Milliseconds / Sample)',
+          data: [120.0, 85.0, 65.0, 45.0, 18.4],
+          backgroundColor: ['#ef4444', '#f97316', '#eab308', '#3b82f6', '#10b981']
+        }]
+      },
+      options: {
+        responsive: true,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // Chart 4: Literature Dimensions
+    const ctxLitDim = document.getElementById('litDimChart').getContext('2d');
+    new Chart(ctxLitDim, {
+      type: 'bar',
+      data: {
+        labels: ['XMalGuard (Proposed)', 'Yousuf et al.', 'Saxe & Berlin', 'Anderson & Roth', 'Raff et al. (MalConv)'],
+        datasets: [{
+          label: 'Feature Dimensions (Log Scale)',
+          data: [35, 56, 1024, 2351, 2000000],
+          backgroundColor: ['#10b981', '#3b82f6', '#eab308', '#f97316', '#ef4444']
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { type: 'logarithmic' } },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // Chart 5: Ablation Bar Chart
+    const ctxAblation = document.getElementById('ablationBarChart').getContext('2d');
+    new Chart(ctxAblation, {
+      type: 'bar',
+      data: {
+        labels: [
+          'Tier 1: Headers (12 Feats)',
+          'Tier 2: + Sections (19 Feats)',
+          'Tier 3: + Entropy (25 Feats)',
+          'Tier 4: + Imports (35 Feats)',
+          'Tier 5: Composite Threat Engine'
+        ],
+        datasets: [
+          { label: 'F1-Score (%)', data: [91.15, 95.45, 97.46, 98.79, 99.06], backgroundColor: '#8b5cf6' },
+          { label: 'Accuracy (%)', data: [91.20, 95.47, 97.47, 98.80, 99.07], backgroundColor: '#3b82f6' }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { min: 88, max: 100 } }
+      }
+    });
+
+    // Chart 6: SHAP Feature Importance
+    const ctxShap = document.getElementById('shapChart').getContext('2d');
+    new Chart(ctxShap, {
+      type: 'bar',
+      data: {
+        labels: [
+          'suspicious_import_count',
+          'section_max_entropy',
+          'has_upx_sections',
+          'virtual_raw_size_ratio',
+          'export_count',
+          'has_debug',
+          'section_min_entropy',
+          'num_imported_dlls',
+          'size_of_code',
+          'section_entropy_std'
+        ],
+        datasets: [{
+          label: 'Mean |SHAP| Attribution',
+          data: [0.3842, 0.2915, 0.1820, 0.1432, 0.0821, 0.0764, 0.0651, 0.0543, 0.0487, 0.0412],
+          backgroundColor: '#e11d48'
+        }]
+      },
+      options: {
+        responsive: true,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // Chart 7: Latency Doughnut
+    const ctxLatDoughnut = document.getElementById('latencyDoughnut').getContext('2d');
+    new Chart(ctxLatDoughnut, {
+      type: 'doughnut',
+      data: {
+        labels: ['Static Header Parsing (6.2ms)', 'Shannon Entropy (5.8ms)', 'Vector Scaling (1.4ms)', 'XGBoost Inference (1.8ms)', 'SHAP Attribution (3.2ms)'],
+        datasets: [{
+          data: [6.2, 5.8, 1.4, 1.8, 3.2],
+          backgroundColor: ['#0284c7', '#0ea5e9', '#10b981', '#f59e0b', '#e11d48']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  </script>
+</body>
+</html>

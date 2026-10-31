@@ -9,8 +9,16 @@ function PredictionCard({ prediction }) {
   if (typeof prediction === 'string' && prediction.toLowerCase() === 'malicious') isMalicious = true;
 
   const label = isMalicious ? 'MALICIOUS' : 'BENIGN';
-  const confidence = (prediction.confidence * 100 || 0).toFixed(1);
+  const confidence = (Number(prediction.confidence || 0) * 100).toFixed(1);
   
+  const malProb = prediction.probabilities?.malicious !== undefined 
+    ? prediction.probabilities.malicious 
+    : (prediction.malicious_probability !== undefined ? prediction.malicious_probability : (isMalicious ? prediction.confidence : 1 - prediction.confidence));
+    
+  const benProb = prediction.probabilities?.benign !== undefined 
+    ? prediction.probabilities.benign 
+    : (prediction.benign_probability !== undefined ? prediction.benign_probability : (isMalicious ? 1 - prediction.confidence : prediction.confidence));
+
   const bgColor = isMalicious ? 'var(--critical)' : 'var(--success)';
   const textColor = 'white';
 
@@ -19,12 +27,12 @@ function PredictionCard({ prediction }) {
       <h3 style={{ textTransform: 'uppercase', letterSpacing: '2px', opacity: 0.9, margin: 0 }}>Verdict</h3>
       <div style={{ fontSize: '3rem', fontWeight: 'bold', margin: '16px 0' }}>{label}</div>
       <div style={{ width: '100%', maxWidth: '300px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '8px', height: '12px', overflow: 'hidden', margin: '8px 0' }}>
-        <div style={{ width: `${confidence}%`, backgroundColor: 'white', height: '100%' }}></div>
+        <div style={{ width: `${Math.min(100, Math.max(0, confidence))}%`, backgroundColor: 'white', height: '100%' }}></div>
       </div>
       <p style={{ fontSize: '1.2rem', fontWeight: '500' }}>{confidence}% Confidence</p>
       <div style={{ display: 'flex', gap: '16px', marginTop: '16px', fontSize: '0.9rem', opacity: 0.9 }}>
-        <span>Malicious: {(prediction.probabilities?.malicious * 100).toFixed(1) || 0}%</span>
-        <span>Benign: {(prediction.probabilities?.benign * 100).toFixed(1) || 0}%</span>
+        <span>Malicious Probability: {(Number(malProb || 0) * 100).toFixed(1)}%</span>
+        <span>Benign Probability: {(Number(benProb || 0) * 100).toFixed(1)}%</span>
       </div>
     </div>
   );

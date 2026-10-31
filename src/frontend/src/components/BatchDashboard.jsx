@@ -3,10 +3,22 @@ import React from 'react';
 function BatchDashboard({ batchResult, onNewAnalysis, onViewDetails }) {
   if (!batchResult || !batchResult.results) return null;
 
+  const isMalicious = (pred) => {
+    if (!pred) return false;
+    const p = String(pred).toUpperCase();
+    return p === 'MALICIOUS' || p === '1' || p === 'TRUE';
+  };
+
+  const isBenign = (pred) => {
+    if (!pred) return false;
+    const p = String(pred).toUpperCase();
+    return p === 'BENIGN' || p === '0' || p === 'FALSE';
+  };
+
   const totalFiles = batchResult.total_files;
-  const maliciousCount = batchResult.results.filter(r => r.prediction === 'MALICIOUS').length;
-  const benignCount = batchResult.results.filter(r => r.prediction === 'BENIGN').length;
-  const errorCount = batchResult.results.filter(r => r.prediction === 'ERROR').length;
+  const maliciousCount = batchResult.results.filter(r => isMalicious(r.prediction)).length;
+  const benignCount = batchResult.results.filter(r => isBenign(r.prediction)).length;
+  const errorCount = batchResult.results.filter(r => !isMalicious(r.prediction) && !isBenign(r.prediction)).length;
 
   return (
     <div className="card">
@@ -51,32 +63,38 @@ function BatchDashboard({ batchResult, onNewAnalysis, onViewDetails }) {
             </tr>
           </thead>
           <tbody>
-            {batchResult.results.map((r, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid #dee2e6', background: r.prediction === 'MALICIOUS' ? '#fff9f9' : (r.prediction === 'BENIGN' ? '#f9fff9' : '#fff') }}>
-                <td style={{ padding: '12px' }}><strong>{r.filename}</strong></td>
-                <td style={{ padding: '12px' }}>
-                  <span className={`badge ${r.prediction === 'MALICIOUS' ? 'badge-danger' : (r.prediction === 'BENIGN' ? 'badge-success' : 'badge-warning')}`}>
-                    {r.prediction}
-                  </span>
-                </td>
-                <td style={{ padding: '12px' }}>{(r.confidence * 100).toFixed(1)}%</td>
-                <td style={{ padding: '12px' }}>{r.risk_level}</td>
-                <td style={{ padding: '12px', color: r.threat_type !== 'Clean' && r.threat_type !== 'Unknown' ? '#dc3545' : '#6c757d' }}>{r.threat_type}</td>
-                <td style={{ padding: '12px', color: r.malware_family !== 'None' && r.malware_family !== 'Unknown' ? '#dc3545' : '#6c757d' }}>{r.malware_family}</td>
-                <td style={{ padding: '12px', color: '#dc3545', fontSize: '0.85rem' }}>{r.top_malicious}</td>
-                <td style={{ padding: '12px' }}>
-                  {r.analysis_id && (
-                    <button 
-                      className="btn-secondary" 
-                      style={{ padding: '4px 8px', fontSize: '0.8rem' }}
-                      onClick={() => onViewDetails(r.analysis_id)}
-                    >
-                      View Details
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {batchResult.results.map((r, i) => {
+              const mal = isMalicious(r.prediction);
+              const ben = isBenign(r.prediction);
+              const verdictLabel = mal ? 'MALICIOUS' : (ben ? 'BENIGN' : (r.prediction || 'UNKNOWN'));
+
+              return (
+                <tr key={i} style={{ borderBottom: '1px solid #dee2e6', background: mal ? '#fff9f9' : (ben ? '#f9fff9' : '#fff') }}>
+                  <td style={{ padding: '12px' }}><strong>{r.filename}</strong></td>
+                  <td style={{ padding: '12px' }}>
+                    <span className={`badge ${mal ? 'badge-danger' : (ben ? 'badge-success' : 'badge-warning')}`}>
+                      {verdictLabel}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px' }}>{(Number(r.confidence || 0) * 100).toFixed(1)}%</td>
+                  <td style={{ padding: '12px' }}>{r.risk_level}</td>
+                  <td style={{ padding: '12px', color: r.threat_type !== 'Clean' && r.threat_type !== 'Unknown' ? '#dc3545' : '#6c757d' }}>{r.threat_type}</td>
+                  <td style={{ padding: '12px', color: r.malware_family !== 'None' && r.malware_family !== 'Unknown' ? '#dc3545' : '#6c757d' }}>{r.malware_family}</td>
+                  <td style={{ padding: '12px', color: '#dc3545', fontSize: '0.85rem' }}>{r.top_malicious}</td>
+                  <td style={{ padding: '12px' }}>
+                    {r.analysis_id && (
+                      <button 
+                        className="btn-secondary" 
+                        style={{ padding: '4px 8px', fontSize: '0.8rem' }}
+                        onClick={() => onViewDetails(r.analysis_id)}
+                      >
+                        View Details
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

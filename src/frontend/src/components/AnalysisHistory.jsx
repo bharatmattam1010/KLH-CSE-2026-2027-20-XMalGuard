@@ -53,8 +53,24 @@ function AnalysisHistory({ onViewAnalysis }) {
     }
   };
 
+  const checkIsMalicious = (record) => {
+    if (!record) return false;
+    if (record.prediction?.is_malicious !== undefined) return Boolean(record.prediction.is_malicious);
+    if (typeof record.prediction === 'string') return record.prediction.toLowerCase() === 'malicious';
+    if (typeof record.prediction?.prediction === 'string') return record.prediction.prediction.toLowerCase() === 'malicious';
+    return false;
+  };
+
+  const getConfidence = (record) => {
+    const c = record.prediction?.confidence ?? record.confidence ?? 0;
+    return (Number(c) * 100).toFixed(0);
+  };
+
   if (loading && history.length === 0) return <div>Loading history...</div>;
   if (error) return <div className="alert-error">{error}</div>;
+
+  const maliciousCount = history.filter(checkIsMalicious).length;
+  const benignCount = history.length - maliciousCount;
 
   return (
     <div className="card">
@@ -71,19 +87,19 @@ function AnalysisHistory({ onViewAnalysis }) {
             </div>
             <div style={{ flex: 1, minWidth: '120px', padding: '15px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#dc3545' }}>
-                {history.filter(r => r.prediction?.is_malicious).length}
+                {maliciousCount}
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-light)', textTransform: 'uppercase' }}>Malicious Detected</div>
             </div>
             <div style={{ flex: 1, minWidth: '120px', padding: '15px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#28a745' }}>
-                {history.filter(r => !r.prediction?.is_malicious).length}
+                {benignCount}
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-light)', textTransform: 'uppercase' }}>Benign Files</div>
             </div>
             <div style={{ flex: 1, minWidth: '120px', padding: '15px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#fd7e14' }}>
-                {history.filter(r => r.risk_assessment?.level === 'HIGH' || r.risk_assessment?.level === 'CRITICAL').length}
+                {history.filter(r => (r.risk_assessment?.level === 'HIGH' || r.risk_assessment?.level === 'CRITICAL' || r.risk_level === 'HIGH' || r.risk_level === 'CRITICAL')).length}
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-light)', textTransform: 'uppercase' }}>High/Critical Risk</div>
             </div>
@@ -96,66 +112,56 @@ function AnalysisHistory({ onViewAnalysis }) {
                 <th>Filename</th>
                 <th>SHA-256</th>
                 <th>Date</th>
-                <th>Prediction</th>
+                <th>Verdict</th>
                 <th>Risk Score</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {history.map((record) => (
-                <tr 
-                  key={record.id} 
-                  onClick={() => onViewAnalysis(record)}
-                  style={{cursor: 'pointer'}}
-                >
-                  <td style={{fontWeight: '500'}}>{record.file_info?.filename}</td>
-                  <td style={{fontFamily: 'monospace'}}>{truncate(record.file_info?.hashes?.sha256)}</td>
-                  <td>{new Date(record.created_at).toLocaleString()}</td>
-                  <td>
-                    <span className={`badge ${record.prediction?.is_malicious ? 'badge-critical' : 'badge-low'}`}>
-                      {record.prediction?.is_malicious ? 'MALICIOUS' : 'BENIGN'} 
-                      ({(record.prediction?.confidence * 100).toFixed(0)}%)
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`badge ${getBadgeClass(record.risk_assessment?.level)}`}>
-                      {record.risk_assessment?.score?.toFixed(0) || 0} - {record.risk_assessment?.level || 'UNKNOWN'}
-                    </span>
-                  </td>
-                  <td>
-                    <button 
-                      className="btn-danger"
-                      style={{padding: '4px 8px', fontSize: '0.8rem'}}
-                      onClick={(e) => handleDelete(record.id, e)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {history.map((record) => {
+                const isMal = checkIsMalicious(record);
+                const filename = record.file_info?.filename || record.filename || 'Unknown';
+                const sha = record.file_info?.hashes?.sha256 || record.sha256 || '';
+                const dateStr = record.created_at || record.timestamp || '';
+                const riskLevel = record.risk_assessment?.level || record.risk_level || (isMal ? 'CRITICAL' : 'LOW');
+                const riskScore = record.risk_assessment?.score ?? record.risk_score ?? (isMal ? 75 : 10);
+
+                return (
+                  <tr 
+                    key={record.id} 
+                    onClick={() => onViewAnalysis(record)}
+                    style={{cursor: 'pointer'}}
+                  >
+                    <td style={{fontWeight: '500'}}>{filename}</td>
+                    <td style={{fontFamily: 'monospace'}}>{truncate(sha)}</td>
+                    <td>{dateStr ? new Date(dateStr).toLocaleString() : 'N/A'}</td>
+                    <td>
+                      <span className={`badge ${isMal ? 'badge-critical' : 'badge-low'}`}>
+                        {isMal ? 'MALICIOUS' : 'BENIGN'} ({getConfidence(record)}%)
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge ${getBadgeClass(riskLevel)}`}>
+                        {Number(riskScore).toFixed(0)} - {riskLevel}
+                      </span>
+                    </td>
+                    <td>
+                      <button 
+                        className="btn-danger"
+                        style={{padding: '4px 8px', fontSize: '0.8rem'}}
+                        onClick={(e) => handleDelete(record.id, e)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
         </>
       )}
-      
-      <div className="flex justify-between mt-4">
-        <button 
-          onClick={() => setPage(p => Math.max(0, p - 1))} 
-          disabled={page === 0 || loading}
-          style={{border: '1px solid var(--border)'}}
-        >
-          Previous
-        </button>
-        <span style={{alignSelf: 'center', fontSize: '0.9rem', color: 'var(--text-light)'}}>Page {page + 1}</span>
-        <button 
-          onClick={() => setPage(p => p + 1)} 
-          disabled={history.length < limit || loading}
-          style={{border: '1px solid var(--border)'}}
-        >
-          Next
-        </button>
-      </div>
     </div>
   );
 }

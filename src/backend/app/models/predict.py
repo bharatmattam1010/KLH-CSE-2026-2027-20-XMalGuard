@@ -56,22 +56,28 @@ class MalwarePredictor:
         X_scaled = self.scaler.transform(X)
         
         # Predict
-        pred = self.model.predict(X_scaled)[0]
+        pred = int(self.model.predict(X_scaled)[0])
         
-        # Get probabilities if available
+        # In standard EMBER and our trained model: 0 = Benign, 1 = Malicious
         if hasattr(self.model, "predict_proba"):
             probs = self.model.predict_proba(X_scaled)[0]
-            prob_0 = float(probs[0])
-            prob_1 = float(probs[1])
+            prob_benign = float(probs[0])
+            prob_malicious = float(probs[1])
         else:
-            prob_0 = 1.0 if pred == 0 else 0.0
-            prob_1 = 1.0 if pred == 1 else 0.0
+            prob_benign = 1.0 if pred == 0 else 0.0
+            prob_malicious = 1.0 if pred == 1 else 0.0
             
-        confidence = max(prob_0, prob_1)
+        is_malicious = bool(pred == 1)
+        confidence = prob_malicious if is_malicious else prob_benign
         
         return {
-            "prediction": "malicious" if pred == 0 else "benign",
+            "prediction": "malicious" if is_malicious else "benign",
+            "is_malicious": is_malicious,
             "confidence": confidence,
-            "malicious_probability": prob_0,
-            "benign_probability": prob_1
+            "malicious_probability": prob_malicious,
+            "benign_probability": prob_benign,
+            "probabilities": {
+                "malicious": prob_malicious,
+                "benign": prob_benign
+            }
         }

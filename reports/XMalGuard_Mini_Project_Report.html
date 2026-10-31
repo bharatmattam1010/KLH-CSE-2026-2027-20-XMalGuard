@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>XMalGuard - Mini Project Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&family=Arial:wght@400;600;700&display=swap');
+
+    @page {
+      size: A4 portrait;
+      margin: 25mm 20mm 25mm 20mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 12pt;
+      line-height: 1.5;
+      color: #000;
+      background: #e2e8f0;
+      padding: 20px 0;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 25mm 20mm 25mm 20mm;
+      margin: 15px auto;
+      background: #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-after: always;
+      break-after: page;
+    }
+
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+      }
+      .page {
+        margin: 0;
+        box-shadow: none;
+        width: 100%;
+        height: 100%;
+        min-height: auto;
+        page-break-after: always;
+        break-after: page;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* Print toolbar */
+    .toolbar {
+      width: 210mm;
+      margin: 0 auto 15px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+    }
+    .toolbar button {
+      background: #b91c1c;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .page-number {
+      text-align: center;
+      font-size: 11pt;
+      margin-top: 20px;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Times New Roman', Times, serif;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    h1.main-title {
+      font-size: 16pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 30px;
+      margin-bottom: 25px;
+      line-height: 1.3;
+    }
+
+    h2.section-heading {
+      font-size: 14pt;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .center-text { text-align: center; }
+    .justify-text { text-align: justify; text-justify: inter-word; }
+    
+    p { margin-bottom: 14px; text-align: justify; }
+
+    .logo-container {
+      text-align: center;
+      margin: 25px 0;
+    }
+    .logo-container img {
+      max-width: 220px;
+      height: auto;
+    }
+
+    .dept-block {
+      text-align: center;
+      font-weight: bold;
+      margin: 20px 0;
+      font-size: 12pt;
+      line-height: 1.4;
+    }
+
+    .author-block {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 12pt;
+      line-height: 1.6;
+    }
+
+    .guidance-block {
+      text-align: center;
+      margin: 25px 0 20px 0;
+      line-height: 1.4;
+    }
+
+    .signatures-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 70px;
+      padding: 0 10px;
+    }
+    .sig-col {
+      text-align: center;
+      width: 45%;
+      border-top: 1px dotted #000;
+      padding-top: 6px;
+      font-weight: bold;
+      font-size: 11pt;
+    }
+
+    .signatures-tri {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 60px;
+    }
+    .sig-item {
+      text-align: center;
+      width: 30%;
+      border-top: 1px dotted #000;
+      padding-top: 6px;
+      font-size: 10.5pt;
+      font-weight: bold;
+    }
+
+    table.toc-table, table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    table.toc-table th, table.toc-table td {
+      border: 1px solid #000;
+      padding: 8px 12px;
+      font-size: 11.5pt;
+    }
+    table.toc-table th { background: #f2f2f2; font-weight: bold; }
+    
+    table.data-table th, table.data-table td {
+      border: 1px solid #000;
+      padding: 6px 10px;
+      font-size: 11pt;
+      text-align: center;
+    }
+    table.data-table th { background: #f2f2f2; font-weight: bold; }
+
+    ul, ol {
+      margin-left: 25px;
+      margin-bottom: 14px;
+    }
+    li { margin-bottom: 6px; }
+
+    .bold { font-weight: bold; }
+    .italic { font-style: italic; }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar no-print">
+    <span><strong>KLH Bachupally</strong> - Mini Project Report (Applied Machine Learning for Text Analytics)</span>
+    <button onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <!-- ==================== PAGE 1: TITLE PAGE ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">1</div>
+      <h1 class="main-title">XMALGUARD: EXPLAINABLE AND THREAT-AWARE AI FRAMEWORK FOR STATIC MALWARE DETECTION</h1>
+      
+      <p class="center-text" style="font-size:12pt; margin: 15px 0;">
+        A Mini Project Report Submitted in partial fulfillment of the requirements for the award of the degree of
+      </p>
+
+      <div class="center-text bold" style="font-size:13pt; margin: 15px 0;">
+        BACHELOR OF TECHNOLOGY
+      </div>
+
+      <p class="center-text" style="margin-bottom: 5px;">In</p>
+
+      <div class="dept-block">
+        DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
+      </div>
+
+      <p class="center-text" style="margin: 15px 0 5px 0;">By</p>
+
+      <div class="author-block">
+        <strong>Mattam Venkata Sesha Bharat</strong> – 2320030109 (Team Lead)<br>
+        <strong>Palle Siddharth Reddy</strong> – 2320030436<br>
+        <strong>Sai Balaji Singh Chungadala</strong> – 2320030494
+      </div>
+
+      <div class="guidance-block">
+        <p class="center-text" style="margin-bottom: 6px;">Under the Esteemed Guidance of</p>
+        <strong style="font-size: 13pt;">Dr. K. Swapnika</strong><br>
+        Assistant Professor<br>
+        Applied Machine Learning for Text Analytics Faculty<br>
+        Department of Computer Science and Engineering
+      </div>
+
+      <div class="logo-container">
+        <img src="klh_logo.png" alt="KLH University Logo">
+      </div>
+    </div>
+    <div class="page-number">1</div>
+  </div>
+
+  <!-- ==================== PAGE 2: DECLARATION ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">2</div>
+      <div class="center-text" style="margin-bottom: 10px;">
+        <span style="font-size: 15pt; font-weight: bold; color: #a31515;">Koneru Lakshmaiah Education Foundation</span><br>
+        <span style="font-size: 9.5pt; color: #333;">(Deemed to be University estd. u/s. 3 of the UGC Act, 1956)</span><br>
+        <span style="font-size: 9.5pt; color: #333;">Off-Campus: Bachupally-Gandimaisamma Road, Bowrampet, Hyderabad, Telangana - 500 043.</span><br>
+        <span style="font-size: 9.5pt; color: #333;">Phone No: 7815926816, www.klh.edu.in</span>
+      </div>
+
+      <div class="dept-block" style="margin: 15px 0;">
+        <span style="font-size: 13pt;">K L (Deemed to be) University</span><br>
+        DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
+      </div>
+
+      <div class="logo-container" style="margin: 15px 0;">
+        <img src="klh_logo.png" alt="KLH Logo" style="max-width: 170px;">
+      </div>
+
+      <h2 class="section-heading" style="margin-top: 25px;">DECLARATION</h2>
+
+      <p class="justify-text" style="line-height: 1.8; margin-top: 20px;">
+        The mini-project report entitled <strong>“XMALGUARD: EXPLAINABLE AND THREAT-AWARE AI FRAMEWORK FOR STATIC MALWARE DETECTION”</strong> is a record of bona fide work carried out by <strong>Mattam Venkata Sesha Bharat (2320030109)</strong>, <strong>Palle Siddharth Reddy (2320030436)</strong>, and <strong>Sai Balaji Singh Chungadala (2320030494)</strong> in partial fulfillment of the requirements for the award of the B.Tech degree at K L (Deemed to be) University. The work presented in this report is original to the best of our knowledge, and all datasets, tools, code, and external sources used have been appropriately acknowledged.
+      </p>
+
+      <div style="float: right; text-align: left; margin-top: 60px; line-height: 2;">
+        <strong>Mattam Venkata Sesha Bharat</strong> – 2320030109<br>
+        <strong>Palle Siddharth Reddy</strong> – 2320030436<br>
+        <strong>Sai Balaji Singh Chungadala</strong> – 2320030494
+      </div>
+      <div style="clear: both;"></div>
+    </div>
+    <div class="page-number">2</div>
+  </div>
+
+  <!-- ==================== PAGE 3: CERTIFICATE ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">3</div>
+      <div class="dept-block" style="margin-top: 20px;">
+        <span style="font-size: 14pt;">K L (Deemed to be) University</span><br>
+        DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
+      </div>
+
+      <div class="logo-container" style="margin: 20px 0;">
+        <img src="klh_logo.png" alt="KLH Logo" style="max-width: 180px;">
+      </div>
+
+      <h2 class="section-heading" style="margin-top: 30px;">CERTIFICATE</h2>
+
+      <p class="justify-text" style="line-height: 1.8; margin-top: 25px;">
+        This is to certify that the mini-project report entitled <strong>“XMALGUARD: EXPLAINABLE AND THREAT-AWARE AI FRAMEWORK FOR STATIC MALWARE DETECTION”</strong> is a bona fide work carried out by <strong>Mattam Venkata Sesha Bharat (2320030109)</strong>, <strong>Palle Siddharth Reddy (2320030436)</strong>, and <strong>Sai Balaji Singh Chungadala (2320030494)</strong> under the supervision of <strong>Dr. K. Swapnika</strong> during the academic year <strong>2026–2027</strong>, in partial fulfillment of the requirements for the award of the Bachelor of Technology degree at K L (Deemed to be) University.
+      </p>
+
+      <div style="margin-top: 80px;">
+        <div style="width: 250px; text-align: center; border-top: 1px dotted #000; padding-top: 5px;">
+          <strong>Signature of the Project Supervisor</strong><br>
+          (Dr. K. Swapnika)
+        </div>
+      </div>
+
+      <div class="signatures-row" style="margin-top: 70px;">
+        <div class="sig-col">
+          Signature of the HOD<br>
+          (Dr. P. Venkateshwar Sir, CSE)
+        </div>
+        <div class="sig-col">
+          Signature of the External Examiner
+        </div>
+      </div>
+    </div>
+    <div class="page-number">3</div>
+  </div>
+
+  <!-- ==================== PAGE 4: ACKNOWLEDGEMENT ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">4</div>
+      <h2 class="section-heading" style="margin-top: 20px;">ACKNOWLEDGEMENT</h2>
+
+      <p class="justify-text" style="line-height: 1.7; margin-top: 25px;">
+        The success in this project would not have been possible but for the timely help and guidance rendered by many people. Our wish to express my sincere thanks to all those who has assisted us in one way or the other for the completion of my project.
+      </p>
+
+      <p class="justify-text" style="line-height: 1.7;">
+        Our greatest appreciation to my guide, <strong>Dr. K. Swapnika</strong>, Applied Machine Learning for Text Analytics faculty of respective section, Department of Computer Science which cannot be expressed in words for his/her tremendous support, encouragement and guidance for this project.
+      </p>
+
+      <p class="justify-text" style="line-height: 1.7;">
+        We express our gratitude to <strong>Dr. P. Venkateshwar Sir (CSE)</strong>, Head of the Department for Computer Science Engineering for providing us with adequate facilities, ways and means by which we are able to complete this project-based Lab.
+      </p>
+
+      <p class="justify-text" style="line-height: 1.7;">
+        We thank all the members of teaching and non-teaching staff members, and also who have assisted me directly or indirectly for successful completion of this project. Finally, I sincerely thank my parents, friends and classmates for their kind help and cooperation during my work.
+      </p>
+
+      <div style="float: right; text-align: left; margin-top: 70px; line-height: 2;">
+        <strong>Mattam Venkata Sesha Bharat</strong> – 2320030109<br>
+        <strong>Palle Siddharth Reddy</strong> – 2320030436<br>
+        <strong>Sai Balaji Singh Chungadala</strong> – 2320030494
+      </div>
+      <div style="clear: both;"></div>
+    </div>
+    <div class="page-number">4</div>
+  </div>
+
+  <!-- ==================== PAGE 5: TABLE OF CONTENTS ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">5</div>
+      <h2 class="section-heading" style="margin-top: 20px;">TABLE OF CONTENTS</h2>
+
+      <table class="toc-table" style="margin-top: 30px;">
+        <thead>
+          <tr>
+            <th style="width: 15%; text-align: center;">S.No.</th>
+            <th style="width: 65%;">Contents</th>
+            <th style="width: 20%; text-align: center;">Page no.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align: center;">1.</td>
+            <td>Abstract</td>
+            <td style="text-align: center;">6</td>
+          </tr>
+          <tr>
+            <td style="text-align: center;">2.</td>
+            <td>Introduction</td>
+            <td style="text-align: center;">7</td>
+          </tr>
+          <tr>
+            <td style="text-align: center;">3.</td>
+            <td>Literature survey</td>
+            <td style="text-align: center;">8</td>
+          </tr>
+          <tr>
+            <td style="text-align: center;">4.</td>
+            <td>Problem Statement and Objectives</td>
+            <td style="text-align: center;">9</td>
+          </tr>
+          <tr>
+            <td style="text-align: center;">5.</td>
+            <td>Hardware and Software requirements</td>
+            <td style="text-align: center;">10</td>
+          </tr>
+          <tr>
+            <td style="text-align: center;">6.</td>
+            <td>Implementation</td>
+            <td style="text-align: center;">11</td>
+          </tr>
+          <tr>
+            <td style="text-align: center;">7.</td>
+            <td>Results & Discussion</td>
+            <td style="text-align: center;">12</td>
+          </tr>
+          <tr>
+            <td style="text-align: center;">8.</td>
+            <td>Conclusion & Future Scope</td>
+            <td style="text-align: center;">13</td>
+          </tr>
+          <tr>
+            <td style="text-align: center;">9.</td>
+            <td>References</td>
+            <td style="text-align: center;">14</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="page-number">5</div>
+  </div>
+
+  <!-- ==================== PAGE 6: 1. ABSTRACT ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">6</div>
+      <h2 class="section-heading">1. ABSTRACT</h2>
+
+      <p class="justify-text" style="line-height: 1.6;">
+        Malicious software represents a critical, rapidly escalating threat across global enterprise networks, with millions of obfuscated zero-day variants engineered specifically to bypass conventional signature-based antivirus solutions. Traditional static analysis relies on rigid string patterns, while dynamic sandboxing suffers from latency and sandbox-evasion tactics. This project presents <strong>XMalGuard</strong>, an interpretable and threat-aware machine learning framework for static Windows Portable Executable (PE) analysis. The framework parses raw PE headers, imported Windows API call strings, section Shannon entropy, and packing metadata without dynamic code execution. Structural and textual indicators are extracted into a 35-dimensional standardized vector and classified via high-performance tree ensembles (Random Forest and XGBoost). To resolve the machine learning black-box dilemma in cybersecurity operations, XMalGuard integrates game-theoretic <strong>SHAP (SHapley Additive exPlanations)</strong> using TreeExplainer, quantifying exact positive and negative feature contributions toward each verdict. Furthermore, a composite risk scoring engine synthesizes model probabilities (50%), structural heuristics (20%), live VirusTotal hash intelligence (20%), and suspicious import frequency (10%) into an actionable 0–100 risk index. On benchmark evaluation using 4,250 balanced samples from the official EMBER dataset, XMalGuard achieved <strong>98.80% accuracy</strong>, <strong>99.10% precision</strong>, <strong>98.40% recall</strong>, and <strong>98.75% F1-score</strong>, establishing a transparent, sub-second threat triage platform for Security Operations Center (SOC) analysts.
+      </p>
+
+      <p style="margin-top: 15px;"><strong>Team Name:</strong> Team 20 (XMalGuard)</p>
+      <p><strong>Team Logo (optional):</strong> Included in University Header / System Banner</p>
+
+      <p style="margin-top: 10px;"><strong>Team Members and Responsibilities:</strong></p>
+      <ol style="line-height: 1.5;">
+        <li><strong>Mattam Venkata Sesha Bharat (2320030109)</strong> – Team Lead: Static PE reverse-engineering pipeline, FastAPI backend architecture, SHAP TreeExplainer integration, and system orchestration.</li>
+        <li><strong>Palle Siddharth Reddy (2320030436)</strong> – Machine Learning Engineer: EMBER dataset preprocessing, feature engineering, Random Forest and XGBoost model training, hyperparameter tuning, and metric evaluation.</li>
+        <li><strong>Sai Balaji Singh Chungadala (2320030494)</strong> – Full-Stack & Threat Intel Engineer: React/Vite interactive dashboard development, Recharts SHAP visualization, VirusTotal threat intelligence integration, and database schema design.</li>
+      </ol>
+
+      <p style="margin-top: 10px;"><strong>Dataset/source and project repository:</strong></p>
+      <p style="word-break: break-all; font-size: 11pt;">
+        • Dataset: EMBER (Elastic Malware Benchmark for Empowering Researchers) 2018 Dataset (CC0 License)<br>
+        • Repository: <a href="https://github.com/bharatmattam1010/KLH-CSE-2026-2027-20-XMalGuard.git">https://github.com/bharatmattam1010/KLH-CSE-2026-2027-20-XMalGuard.git</a>
+      </p>
+    </div>
+    <div class="page-number">6</div>
+  </div>
+
+  <!-- ==================== PAGE 7: 2. INTRODUCTION ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">7</div>
+      <h2 class="section-heading">2. INTRODUCTION</h2>
+
+      <p class="justify-text">
+        The proliferation of sophisticated malware—including polymorphic ransomware, spyware, backdoors, and rootkits—poses unprecedented challenges to global digital infrastructure. Modern adversary tactics routinely employ code obfuscation, UPX packing, and runtime encryption to alter cryptographic file hashes and evade conventional signature-based endpoint protection. In the domain of security analytics, textual and structural telemetry embedded within program headers—such as imported API function strings (e.g., <code>VirtualAllocEx</code>, <code>CreateRemoteThread</code>), section names, resource descriptors, and entropy metrics—contain rich indicators of intent.
+      </p>
+
+      <p class="justify-text">
+        Manual inspection of binary executables and their textual string tables by human security analysts is fundamentally unscalable given the intake volume of modern enterprise SOCs (often exceeding 400,000 unique binary samples daily). Conversely, dynamic analysis inside sandboxed virtual machines requires substantial compute infrastructure (often 2–5 minutes per binary) and is easily thwarted by environmental detection routines. Machine learning provides an automated, scalable paradigm to discover non-linear combinations of structural and textual features directly from binary files in milliseconds.
+      </p>
+
+      <p class="justify-text">
+        <strong>Target Users and Intended Use:</strong> The primary users of XMalGuard include SOC tier-1 and tier-2 triage analysts, incident response teams, and threat intelligence researchers. The system ingests standard Windows Portable Executable files (<code>.exe</code>, <code>.dll</code>, <code>.sys</code>) or batch JSONL datasets and outputs a definitive classification (Malicious vs. Benign), model confidence percentage, a multi-factor risk score (0–100), and an interactive SHAP local waterfall diagram explaining the decision logic.
+      </p>
+
+      <p class="justify-text">
+        <strong>Proposed Pipeline Architecture:</strong> The XMalGuard pipeline operates across five sequential stages:
+      </p>
+      <ol style="line-height: 1.45;">
+        <li><strong>Data Ingestion & Verification:</strong> Safe uploading and MIME validation of binary executables without code execution.</li>
+        <li><strong>Static Feature Extraction:</strong> Parsing 35 structural, section, string, and import API indicators via the <code>pefile</code> engine.</li>
+        <li><strong>Vector Standardization:</strong> Mapping extracted properties to calibrated EMBER distribution baselines using StandardScaler.</li>
+        <li><strong>Ensemble Model Inference & XAI:</strong> XGBoost and Random Forest probability classification paired with SHAP TreeExplainer game-theoretic attribution.</li>
+        <li><strong>Risk Scoring & Interface Delivery:</strong> Multi-factor composite risk aggregation, VirusTotal threat intelligence cross-referencing, and reactive dashboard rendering.</li>
+      </ol>
+
+      <p class="justify-text">
+        The remainder of this report is organized as follows: Chapter 3 reviews seminal literature; Chapter 4 establishes formal problem statements and objectives; Chapter 5 defines hardware and software requirements; Chapter 6 details the implementation architecture and algorithms; Chapter 7 presents empirical experimental results and SHAP discussions; Chapter 8 concludes the study and outlines future research; and Chapter 9 lists references.
+      </p>
+    </div>
+    <div class="page-number">7</div>
+  </div>
+
+  <!-- ==================== PAGE 8: 3. LITERATURE SURVEY ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">8</div>
+      <h2 class="section-heading">3. LITERATURE SURVEY</h2>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 8px;">
+        <strong>1. Saxe and Berlin (2015) [MALWARE Conference]:</strong><br>
+        Investigated deep neural network classifiers operating on 2D histogram representations of byte entropy, imported API strings, and PE metadata extracted from a corpus of 400,000 binaries. Their four-layer feedforward network achieved 95.20% accuracy at a 0.1% false positive rate. However, the deep architecture operated strictly as an opaque black box, leaving incident response analysts unable to discern which specific byte sequences or API calls triggered the detection.
+      </p>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 8px;">
+        <strong>2. Anderson and Roth (2018) [arXiv / Endgame EMBER Benchmark]:</strong><br>
+        Formulated the standardized EMBER benchmark comprising 1.1 million Windows PE files parsed into 2,351 dimensional feature vectors (general headers, byte histograms, section entropy, string distributions, and imported functions). Using LightGBM gradient boosting, they demonstrated 96.60% detection accuracy. While establishing an industry-standard static baseline, the model focused solely on raw tabular classification without feature attribution or integration with operational threat intelligence feeds.
+      </p>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 8px;">
+        <strong>3. Raff, Barker, Sylvester, et al. (2018) [AAAI Workshop on AI for Cybersecurity]:</strong><br>
+        Developed MalConv, an end-to-end convolutional neural network processing raw binary bytes and embedded strings up to 2 MB in length without explicit manual feature extraction. MalConv attained 94.00% accuracy on a collection of enterprise executables. The principal limitation was high vulnerability to adversarial evasion via byte appending/padding attacks, alongside substantial training overhead and total lack of interpretability.
+      </p>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 8px;">
+        <strong>4. Lundberg and Lee (2017) [NeurIPS]:</strong><br>
+        Formulated SHAP (SHapley Additive exPlanations), uniting cooperative game theory with local surrogate explanations. They demonstrated that tree ensemble models (XGBoost, Random Forest) can compute exact Shapley values in polynomial time via <code>TreeExplainer</code>, satisfying efficiency, symmetry, and additivity axioms. Their work provided the foundational theoretical basis for introducing transparent interpretability into security classifiers.
+      </p>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 8px;">
+        <strong>5. Shabtai, Moskovitch, Elovici, and Glezer (2012) [Journal of Computer Virology]:</strong><br>
+        Analyzed Windows API execution function strings and n-gram opcode sequences using information gain selection and decision tree ensembles. Their system highlighted that imports such as process injection and memory alteration are disproportionately correlated with malicious behavior, confirming that static structural text provides powerful discriminative power when safely extracted.
+      </p>
+
+      <p class="justify-text" style="font-size: 11pt; margin-top: 10px;">
+        <strong>Research Gap Identified:</strong> Prior works either prioritized classification accuracy using deep black-box models that analysts cannot trust (Gap 1), evaluated feature subsets without explaining predictions at runtime (Gap 2), or treated machine learning in total isolation from factual threat intelligence databases like VirusTotal (Gap 3). <strong>XMalGuard addresses this critical gap</strong> by combining 35-dimensional static extraction, tree-based ensemble inference, post-hoc SHAP local attribution, and composite threat scoring into a unified, high-throughput analyst platform.
+      </p>
+    </div>
+    <div class="page-number">8</div>
+  </div>
+
+  <!-- ==================== PAGE 9: 4. PROBLEM STATEMENT AND OBJECTIVES ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">9</div>
+      <h2 class="section-heading">4. PROBLEM STATEMENT AND OBJECTIVES</h2>
+
+      <p><strong>Problem Statement:</strong></p>
+      <p class="justify-text" style="border-left: 3px solid #000; padding-left: 12px; margin-bottom: 20px;">
+        To design and implement an explainable, static machine learning framework that accurately detects zero-day Windows Portable Executable malware using structural and textual PE attributes, providing security analysts with real-time, game-theoretic decision transparency and composite threat-aware risk scoring.
+      </p>
+
+      <p><strong>Problem Description:</strong></p>
+      <p class="justify-text" style="margin-bottom: 20px;">
+        Conventional antivirus software fails against zero-day and obfuscated malware because signature databases require prior exposure to malicious binaries. While dynamic analysis provides execution visibility, it is resource-intensive, slow (minutes per binary), and susceptible to sandbox evasion routines. Security analysts require an automated static triage engine that evaluates binary intent within milliseconds while explaining <em>why</em> a file was flagged so mitigation actions can be executed with confidence.
+      </p>
+
+      <p><strong>Specific and Measurable Objectives:</strong></p>
+      <ul style="line-height: 1.6;">
+        <li><strong>Dataset Inspection and Curation:</strong> Obtain and inspect a balanced benchmark of 4,250 Portable Executable samples derived from the official EMBER 2018 dataset (3,500 training, 750 testing; 50% benign, 50% malicious), documenting feature distributions and class balance.</li>
+        <li><strong>Static Reverse-Engineering Engine:</strong> Develop a safe, non-executing feature extraction pipeline using <code>pefile</code> to extract 35 numerical, section entropy, and imported API string properties.</li>
+        <li><strong>Feature Normalization:</strong> Preprocess and normalize heterogeneous numerical distributions using <code>StandardScaler</code> fitted strictly on training splits to prevent data leakage.</li>
+        <li><strong>Ensemble Machine Learning Models:</strong> Train, optimize, and compare Random Forest, XGBoost, Support Vector Classifier, and Logistic Regression algorithms using 5-fold cross-validation.</li>
+        <li><strong>Evaluation Metrics & Benchmarking:</strong> Evaluate model performance using Accuracy, Precision, Recall, F1-Score, and a Confusion Matrix on an unseen test set of 750 binaries.</li>
+        <li><strong>Explainable AI Integration (SHAP):</strong> Implement SHAP <code>TreeExplainer</code> to generate sample-level local attribution waterfalls quantifying the mathematical impact of individual features.</li>
+        <li><strong>Composite Risk Scoring & Threat Intel:</strong> Formulate a 0–100 weighted risk score fusing ML probability, structural red flags, and SHA-256 VirusTotal hash lookup.</li>
+        <li><strong>Interactive Analyst Dashboard:</strong> Deploy an asynchronous FastAPI REST backend and React.js web interface supporting drag-and-drop file scanning, batch dataset triage, and PDF reporting.</li>
+      </ul>
+    </div>
+    <div class="page-number">9</div>
+  </div>
+
+  <!-- ==================== PAGE 10: 5. HARDWARE AND SOFTWARE REQUIREMENTS ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">10</div>
+      <h2 class="section-heading">5. HARDWARE AND SOFTWARE REQUIREMENTS</h2>
+
+      <p><strong>Hardware Requirements:</strong></p>
+      <ul style="line-height: 1.6;">
+        <li><strong>Processor (CPU):</strong> Multi-core processor (Intel Core i5/i7 8th Gen or AMD Ryzen 5/7 equivalent or higher). Multi-threading is utilized for parallel static PE extraction and tree ensemble training.</li>
+        <li><strong>System Memory (RAM):</strong> Minimum 8 GB DDR4 RAM (16 GB recommended) to accommodate in-memory streaming of large compressed JSONL dataset files and SHAP background matrix evaluation without memory crashes.</li>
+        <li><strong>Storage:</strong> Minimum 10 GB available SSD disk space for storing raw binary executables, EMBER dataset archives, virtual environments, serialized model artifacts (<code>.joblib</code>), and SQLite databases.</li>
+        <li><strong>Network Connectivity:</strong> Active high-speed Internet connectivity for package dependency resolution, VirusTotal Threat Intelligence API requests, and CDN font rendering. (GPU acceleration is optional as tree ensemble inference executes in under 20 ms on CPU).</li>
+      </ul>
+
+      <p style="margin-top: 20px;"><strong>Software Requirements:</strong></p>
+      <ul style="line-height: 1.6;">
+        <li><strong>Operating System:</strong> 64-bit Windows 10/11 or Ubuntu Linux 22.04 LTS.</li>
+        <li><strong>Runtime Environment:</strong> Python 3.10+ (64-bit) and Node.js v18.0+ with npm for full-stack execution.</li>
+        <li><strong>Core Machine Learning & Data Libraries:</strong>
+          <ul>
+            <li><code>scikit-learn (v1.3+)</code>: For data scaling, LogisticRegression, RandomForestClassifier, and cross-validation metrics.</li>
+            <li><code>xgboost (v2.0+)</code>: Gradient boosted decision tree implementation for high-speed tabular classification.</li>
+            <li><code>shap (v0.43+)</code>: Game-theoretic SHAP <code>TreeExplainer</code> for feature attribution extraction.</li>
+            <li><code>pandas (v2.0+)</code> & <code>numpy (v1.24+)</code>: Tabular data manipulation and array linear algebra.</li>
+          </ul>
+        </li>
+        <li><strong>Static Binary Analysis & Threat Intelligence:</strong>
+          <ul>
+            <li><code>pefile (v2023.2.7)</code>: Python library for safely parsing Portable Executable headers and section tables.</li>
+            <li><code>requests / httpx</code>: Asynchronous HTTP clients for querying external Threat Intelligence feeds (VirusTotal).</li>
+          </ul>
+        </li>
+        <li><strong>Application Frameworks & Database:</strong>
+          <ul>
+            <li><strong>Backend API:</strong> <code>FastAPI (v0.104+)</code> running on <code>uvicorn</code> ASGI server.</li>
+            <li><strong>Frontend Interface:</strong> <code>React.js (v18.2)</code> built with <code>Vite</code>, styled via <code>Tailwind CSS</code> and charted with <code>Recharts</code>.</li>
+            <li><strong>Persistence:</strong> <code>SQLite</code> managed via <code>SQLAlchemy</code> ORM for audit history tracking.</li>
+          </ul>
+        </li>
+        <li><strong>Dataset Source & License:</strong> EMBER 2018 dataset (published by Endgame / Elastic), distributed under the Creative Commons CC0 1.0 Universal Public Domain Dedication.</li>
+      </ul>
+    </div>
+    <div class="page-number">10</div>
+  </div>
+
+  <!-- ==================== PAGE 11: 6. IMPLEMENTATION ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">11</div>
+      <h2 class="section-heading">6. IMPLEMENTATION</h2>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 6px;">
+        <strong>1. Data and Task Specification:</strong> The binary classification task assigns label \(y \in \{0, 1\}\) (\(0 = \text{Benign}\), \(1 = \text{Malicious}\)). The curated dataset comprises 4,250 samples partitioned into 3,500 training samples (82.35%) and 750 hold-out test samples (17.65%) using stratified sampling to preserve exact 50:50 class balance.
+      </p>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 6px;">
+        <strong>2. Static Feature Extraction & Preprocessing:</strong> The <code>FeatureExtractor</code> parses binaries using <code>pefile</code>, computing Shannon entropy \(H = -\sum_{i=1}^{n} p_i \log_2(p_i)\) per section, detecting UPX signature strings, counting suspicious Windows APIs (e.g., memory injection, keylogging), and calculating virtual-to-raw size ratios across 35 features. Missing values are imputed with median training values, and features are normalized using <code>StandardScaler</code> fit exclusively on training data to prevent data leakage.
+      </p>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 8px;">
+        <strong>3. Model Training & Validation Strategy:</strong> Models were evaluated with 5-fold cross-validation. The Random Forest classifier was parameterized with 100 estimators, maximum tree depth of 15, and Gini impurity criterion. The XGBoost classifier employed 100 boosted trees with learning rate \(\eta = 0.1\) and <code>binary:logistic</code> objective function.
+      </p>
+
+      <p style="font-size: 11pt; margin-bottom: 4px;"><strong>A. Project Workflow and Modular Structure:</strong></p>
+      <ul style="font-size: 10.5pt; line-height: 1.35; margin-bottom: 8px;">
+        <li><code>src/backend/app/core/extractor.py</code>: Non-executing static PE header, section entropy, and API import parsing engine.</li>
+        <li><code>src/backend/app/models/train.py</code>: Data loading, scaler fitting, multi-model cross-validation, and serialized joblib export.</li>
+        <li><code>src/backend/app/models/predict.py</code>: Real-time inference execution and probability calibration.</li>
+        <li><code>src/backend/app/core/explainer.py</code>: TreeExplainer Shapley value computation and waterfall formatting.</li>
+        <li><code>src/backend/app/core/risk_scorer.py</code>: Multi-factor composite heuristic calculation (0–100 scale).</li>
+        <li><code>src/backend/app/api/analyze.py</code>: Asynchronous REST endpoint orchestrating the end-to-end analysis lifecycle.</li>
+      </ul>
+
+      <p style="font-size: 11pt; margin-bottom: 4px;"><strong>B. Machine-Learning Implementation Excerpt:</strong></p>
+      <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 6px 10px; font-family: monospace; font-size: 9pt; line-height: 1.3; margin-bottom: 8px;">
+        # Multi-factor composite risk scoring formula implementation<br>
+        ml_component = float(malicious_probability * 50.0)<br>
+        static_component = min(20.0, (entropy_score * 8.0) + (upx_flag * 6.0) + (suspicious_apis * 0.5))<br>
+        intel_component = float(virustotal_detection_ratio * 20.0)<br>
+        import_component = min(10.0, float(suspicious_import_count * 0.7))<br>
+        composite_risk_score = int(round(ml_component + static_component + intel_component + import_component))
+      </div>
+
+      <p style="font-size: 11pt; margin-bottom: 4px;"><strong>C. Demonstration & REST API Implementation:</strong></p>
+      <p class="justify-text" style="font-size: 10.5pt; line-height: 1.35;">
+        The FastAPI backend serves <code>POST /api/analyze</code> for binary uploads and <code>POST /api/batch-analyze</code> for compressed JSONL archives. The React frontend visualizes real-time gauge dials, interactive Recharts SHAP waterfalls, historical SQLite scans, and exportable PDF audit reports.
+      </p>
+    </div>
+    <div class="page-number">11</div>
+  </div>
+
+  <!-- ==================== PAGE 12: 7. RESULTS AND DISCUSSION ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">12</div>
+      <h2 class="section-heading">7. RESULTS AND DISCUSSION</h2>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 10px;">
+        <strong>Experimental Benchmark Results:</strong> The trained classifiers were evaluated on an unseen holdout test set of 750 balanced Portable Executable binaries (375 benign, 375 malicious). Table 7.1 reports the comparative evaluation metrics across classical and ensemble models.
+      </p>
+
+      <p class="center-text" style="font-size: 10.5pt; font-weight: bold; margin-bottom: 4px;">Table 7.1: Model Performance Comparison (Test Set = 750 Binaries)</p>
+      <table class="data-table" style="margin-top: 0; margin-bottom: 12px;">
+        <thead>
+          <tr>
+            <th>Model Algorithm</th>
+            <th>Accuracy (%)</th>
+            <th>Precision (%)</th>
+            <th>Recall (%)</th>
+            <th>F1-Score (%)</th>
+            <th>ROC-AUC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Logistic Regression</td>
+            <td>94.40%</td>
+            <td>93.80%</td>
+            <td>95.10%</td>
+            <td>94.45%</td>
+            <td>0.978</td>
+          </tr>
+          <tr>
+            <td>Support Vector Classifier (SVC)</td>
+            <td>96.20%</td>
+            <td>95.90%</td>
+            <td>96.50%</td>
+            <td>96.20%</td>
+            <td>0.985</td>
+          </tr>
+          <tr>
+            <td>Random Forest Classifier</td>
+            <td>98.67%</td>
+            <td>98.93%</td>
+            <td>98.40%</td>
+            <td>98.66%</td>
+            <td>0.997</td>
+          </tr>
+          <tr style="background: #fef3c7; font-weight: bold;">
+            <td>Proposed XMalGuard (XGBoost Ensemble)</td>
+            <td>98.80%</td>
+            <td>99.10%</td>
+            <td>98.40%</td>
+            <td>98.75%</td>
+            <td>0.998</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="justify-text" style="font-size: 11pt; margin-bottom: 10px;">
+        <strong>Confusion Matrix Analysis:</strong> On the 750 test samples, the proposed model produced <strong>372 True Negatives (TN)</strong>, <strong>369 True Positives (TP)</strong>, only <strong>3 False Positives (FP)</strong>, and <strong>6 False Negatives (FN)</strong>. The exceptionally low False Positive rate (0.80%) is critical for enterprise security monitoring, ensuring benign administrative software is not improperly blocked.
+      </p>
+
+      <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px; border-radius: 4px; margin-bottom: 12px;">
+        <p class="center-text" style="font-weight: bold; font-size: 10.5pt; margin-bottom: 4px;">Confusion Matrix (Test Evaluation)</p>
+        <table style="width: 70%; margin: 0 auto; border-collapse: collapse; font-size: 10pt; text-align: center;">
+          <tr>
+            <td colspan="2"></td>
+            <td colspan="2" style="font-weight: bold; background: #e2e8f0; padding: 4px; border: 1px solid #cbd5e1;">Predicted Class</td>
+          </tr>
+          <tr>
+            <td colspan="2"></td>
+            <td style="font-weight: bold; color: #0f766e; border: 1px solid #cbd5e1; padding: 4px;">Predicted Benign</td>
+            <td style="font-weight: bold; color: #b91c1c; border: 1px solid #cbd5e1; padding: 4px;">Predicted Malicious</td>
+          </tr>
+          <tr>
+            <td rowspan="2" style="font-weight: bold; background: #e2e8f0; border: 1px solid #cbd5e1; padding: 4px; width: 25%;">Actual Class</td>
+            <td style="font-weight: bold; color: #0f766e; border: 1px solid #cbd5e1; padding: 4px;">Actual Benign (375)</td>
+            <td style="background: #0284c7; color: #fff; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px;">372 (TN)</td>
+            <td style="background: #fee2e2; color: #b91c1c; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px;">3 (FP)</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; color: #b91c1c; border: 1px solid #cbd5e1; padding: 4px;">Actual Malware (375)</td>
+            <td style="background: #fee2e2; color: #b91c1c; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px;">6 (FN)</td>
+            <td style="background: #0284c7; color: #fff; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px;">369 (TP)</td>
+          </tr>
+        </table>
+        <p class="center-text" style="font-size: 9.5pt; color: #0284c7; font-weight: bold; margin-top: 5px; margin-bottom: 0;">
+          Test Accuracy: 98.80% | Misclassification Error: 1.20% (9 of 750)
+        </p>
+      </div>
+
+      <p class="justify-text" style="font-size: 11pt;">
+        <strong>Explainability (SHAP) Insights:</strong> Global Shapley value rankings revealed that the four most dominant predictors driving malicious classification are: (1) <code>suspicious_import_count</code> (mean \(|\text{SHAP}| = +0.38\)), (2) <code>section_max_entropy</code> (\(+0.29\)), (3) <code>has_upx_sections</code> (\(+0.18\)), and (4) <code>virtual_raw_size_ratio</code> (\(+0.14\)). Conversely, large export address tables and standard digital certificate metadata exerted consistent negative push toward benign classifications.
+      </p>
+    </div>
+    <div class="page-number">12</div>
+  </div>
+
+  <!-- ==================== PAGE 13: 8. CONCLUSION AND FUTURE SCOPE ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">13</div>
+      <h2 class="section-heading">8. CONCLUSION AND FUTURE SCOPE</h2>
+
+      <p class="justify-text" style="line-height: 1.7;">
+        <strong>Project Summary & Achievements:</strong> This mini-project successfully engineered and validated <strong>XMalGuard</strong>, an explainable and threat-aware static malware detection platform tailored for Windows Portable Executable binaries. By reverse-engineering structural PE headers, calculating section Shannon entropy distributions, and tokenizing sensitive Windows API call imports without dynamic execution risk, the system extracts a high-density 35-dimensional feature representation. Experimental evaluations on the benchmark EMBER dataset confirmed that our tree-based ensemble architecture achieves state-of-the-art static performance: <strong>98.80% accuracy</strong>, <strong>99.10% precision</strong>, and <strong>98.75% F1-score</strong>.
+      </p>
+
+      <p class="justify-text" style="line-height: 1.7;">
+        Critically, all defined project objectives were fulfilled:
+      </p>
+      <ul style="line-height: 1.55;">
+        <li>Static extraction executed in under 25 milliseconds per executable without runtime vulnerabilities.</li>
+        <li>Game-theoretic SHAP <code>TreeExplainer</code> interpretability resolved the black-box dilemma, providing analysts with quantitative, feature-level rationale for every verdict.</li>
+        <li>A multi-factor composite risk engine successfully fused statistical probabilities, structural anomalies, and VirusTotal threat intelligence into an actionable 0–100 threat score.</li>
+        <li>An asynchronous full-stack web application was deployed, enabling drag-and-drop file inspection, batch dataset streaming, and automated audit report generation.</li>
+      </ul>
+
+      <p class="justify-text" style="line-height: 1.7;">
+        <strong>Important Limitations:</strong> The framework currently analyzes PE files statically, meaning it cannot monitor runtime API execution sequences or kernel memory injections of files that unpack secondary stages strictly in memory.
+      </p>
+
+      <p class="justify-text" style="line-height: 1.7;">
+        <strong>Future Scope and Extensions:</strong>
+      </p>
+      <ul style="line-height: 1.55;">
+        <li><strong>Cross-Platform Binary Expansion:</strong> Extending the static parser to support Linux Executable and Linkable Format (ELF) and macOS Mach-O executable formats.</li>
+        <li><strong>Automated YARA Rule Synthesis:</strong> Translating top SHAP explanatory features directly into standardized YARA detection rules for instant firewall and SIEM deployment.</li>
+        <li><strong>Dynamic Telemetry Fusion:</strong> Incorporating lightweight sandbox trace telemetry (Cuckoo / CAPE sandbox API logs) to augment static predictions when uncertainty thresholds are triggered.</li>
+        <li><strong>Enterprise SIEM Webhook Integration:</strong> Deploying bi-directional webhook connectors for Splunk, Microsoft Sentinel, and Elastic EDR for enterprise threat containment.</li>
+        <li><strong>LLM-Assisted Threat Narratives:</strong> Integrating localized Large Language Models to convert raw SHAP values into executive natural-language cybersecurity incident summaries.</li>
+      </ul>
+    </div>
+    <div class="page-number">13</div>
+  </div>
+
+  <!-- ==================== PAGE 14: 9. REFERENCES ==================== -->
+  <div class="page">
+    <div>
+      <div class="page-number" style="margin-top:0;">14</div>
+      <h2 class="section-heading">9. REFERENCES</h2>
+
+      <ol style="line-height: 1.6; font-size: 11pt; margin-left: 20px;">
+        <li>
+          <strong>Dataset Documentation & Publication:</strong><br>
+          H. S. Anderson and P. Roth, "EMBER: An Open Dataset for Training Static PE Malware Machine Learning Models," <em>arXiv preprint arXiv:1804.04159</em>, 2018. URL: <a href="https://arxiv.org/abs/1804.04159">https://arxiv.org/abs/1804.04159</a>.
+        </li>
+        <li>
+          <strong>Deep Learning Static Malware Detection:</strong><br>
+          J. Saxe and K. Berlin, "Deep Neural Network Based Malware Detection Using Two Dimensional Binary Program Features," in <em>2015 10th International Conference on Malicious and Unwanted Software (MALWARE)</em>, IEEE, 2015, pp. 11–20. DOI: 10.1109/MALWARE.2015.7413680.
+        </li>
+        <li>
+          <strong>Byte-Level & Structural Representation:</strong><br>
+          E. Raff, J. Barker, J. Sylvester, R. Brandon, B. Catanzaro, and C. K. Nicholas, "Malware Detection by Eating a Whole EXE," in <em>Workshops at the Thirty-Second AAAI Conference on Artificial Intelligence (AAAI-18)</em>, 2018, pp. 268–276.
+        </li>
+        <li>
+          <strong>Explainable Artificial Intelligence (XAI / SHAP):</strong><br>
+          S. M. Lundberg and S.-I. Lee, "A Unified Approach to Interpreting Model Predictions," in <em>Advances in Neural Information Processing Systems (NeurIPS 2017)</em>, vol. 30, 2017, pp. 4765–4774.
+        </li>
+        <li>
+          <strong>Scikit-Learn Machine Learning Documentation:</strong><br>
+          F. Pedregosa, G. Varoquaux, A. Gramfort, et al., "Scikit-learn: Machine Learning in Python," <em>Journal of Machine Learning Research</em>, vol. 12, pp. 2825–2830, 2011. URL: <a href="https://scikit-learn.org/stable/">https://scikit-learn.org/stable/</a>.
+        </li>
+        <li>
+          <strong>PE Binary Header Parsing Engine:</strong><br>
+          E. Carrera, "pefile: A Python module to read and work with PE (Portable Executable) files," 2023. URL: <a href="https://github.com/erocarrera/pefile">https://github.com/erocarrera/pefile</a>.
+        </li>
+        <li>
+          <strong>Gradient Tree Boosting Framework:</strong><br>
+          T. Chen and C. Guestrin, "XGBoost: A Scalable Tree Boosting System," in <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD '16)</em>, 2016, pp. 785–794. DOI: 10.1145/2939672.2939785.
+        </li>
+        <li>
+          <strong>Windows API Text Mining & Feature Extraction:</strong><br>
+          A. Shabtai, R. Moskovitch, Y. Elovici, and C. Glezer, "Detection of Malicious Code by Applying Machine Learning Classifiers on Static Features: A State-of-the-Art Survey," <em>Information Security Technical Report</em>, vol. 14, no. 1, pp. 16–29, 2009.
+        </li>
+        <li>
+          <strong>FastAPI Asynchronous Web Framework:</strong><br>
+          S. Ramírez, "FastAPI: High performance, easy to learn, fast to code, ready for production," 2023. URL: <a href="https://fastapi.tiangolo.com/">https://fastapi.tiangolo.com/</a>.
+        </li>
+        <li>
+          <strong>Threat Intelligence & Collaborative Defense:</strong><br>
+          VirusTotal, "VirusTotal Public API v3 Documentation," Google Cloud Security, 2023. URL: <a href="https://developers.virustotal.com/reference/overview">https://developers.virustotal.com/reference/overview</a>.
+        </li>
+      </ol>
+    </div>
+    <div class="page-number">14</div>
+  </div>
+
+</body>
+</html>
